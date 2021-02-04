@@ -1,0 +1,17 @@
+version: "3.6"
+services:
+  bootcamp-db:
+    image: mysql:8.0.20
+    container_name: bootcamp-db
+    restart: always
+    environment:
+      - MYSQL_ROOT_USER=root
+      - MYSQL_ROOT_PASSWORD=mypassword
+      - MYSQL_DATABASE=bootcamp
+      - TZ=Asia/Seoul
+    command: --init-file /data/application/init.sql --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --default-time-zone=+09:00
+    volumes:
+      - ./init.sql:/data/application/init.sql
+      - ./data/mysql:/var/lib/mysql
+    ports:
+      - "0.0.0.0:3306:3306"

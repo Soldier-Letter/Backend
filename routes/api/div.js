@@ -210,7 +210,7 @@ router.post('/div/local', auth, async function (req, res, next) {
         information,
       ],
     );
-    res.status(200).send(divFacility);
+    res.status(200).send(divFacility[0]);
   } catch (e) {
     console.log(e);
     res.status(400).send(e);
@@ -271,7 +271,15 @@ router.post('/div/rating', auth, async function (req, res, next) {
         params['content'],
       ],
     );
-    res.status(200).send(ratingInfo);
+
+    const divInfo = await mysqlUtil('call proc_update_div_rating(?)', [
+      params['div_uid'],
+    ]);
+    const item = {
+      rating: ratingInfo[0],
+      division: divInfo[0],
+    };
+    res.status(200).send(item);
   } catch (e) {
     console.log(e);
     res.status(400).send(e);

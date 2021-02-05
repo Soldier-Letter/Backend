@@ -2,9 +2,33 @@ const express = require('express');
 const router = new express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const multer = require('multer');
+const multerS3 = require('multer-s3');
+const AWS = require('aws-sdk');
 const mysqlUtils = require('../../utils/mysqlUtils');
 const paramUtil = require('../../utils/paramUtil');
 const { auth, hash, emailValidator } = require('../middleware/auth');
+
+const s3 = new AWS.S3({
+  accessKeyId: process.env.KEYID,
+  secretAccessKey: process.env.KEY,
+  region: process.env.REGION,
+});
+
+let imageName = '';
+
+const upload = multer({
+  storage: multerS3({
+    s3: s3,
+    contentType: multerS3.AUTO_CONTENT_TYPE,
+    bucket: process.env.BUCKET,
+    key: function (req, file, cb) {
+      imageName = Date.now() + file.originalname;
+      cb(null, imageName);
+    },
+    acl: 'public-read-write',
+  }),
+});
 
 // 유저 회원가입
 router.post('/user', [emailValidator, hash], async (req, res) => {
@@ -113,5 +137,32 @@ router.post('/user/logout', auth, async (req, res) => {
     res.status(404).send();
   }
 });
+
+router.post(
+  '/user/certificate',
+  [auth, upload.single('image')],
+  async (req, res) => {
+    try {
+      const user = req.user;
+
+      if (!req.file) {
+        res.status(400).send('이미지 파일 확인');
+      }
+
+      const userCertificate = await mysqlUtils(
+        'CALL proc_update_user_certificate(?,?)',
+        [
+          user['uid'],
+          `https://hackathonbootcamp.s3.ap-northeast-2.amazonaws.com/${imageName}`,
+        ],
+      );
+
+      res.status(200).send(userCertificate[0]);
+    } catch (e) {
+      console.log(e);
+      res.status(400).send(e);
+    }
+  },
+);
 
 module.exports = router;

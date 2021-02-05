@@ -215,6 +215,7 @@ router.post('/div/local', auth, async function (req, res, next) {
       res.status(400).send('content 파라미터 확인');
     }
     if (!paramUtil.paramCheck(params, 'type')) {
+
       res.status(400).send('type 파라미터 확인');
     }
 
@@ -309,6 +310,7 @@ router.post('/div/rating', auth, async function (req, res, next) {
   } catch (e) {
     console.log(e);
     res.status(400).send(e);
+
   }
 });
 

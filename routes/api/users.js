@@ -3,6 +3,7 @@ const router = new express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const mysqlUtils = require('../../utils/mysqlUtils');
+const paramUtil = require('../../utils/paramUtil');
 const { auth, hash, emailValidator } = require('../middleware/auth');
 
 // 유저 회원가입
@@ -10,17 +11,38 @@ router.post('/user', [emailValidator, hash], async (req, res) => {
   try {
     const user = req.body;
 
-    if (
-      !req.body.email ||
-      !req.body.password ||
-      !req.body.name ||
-      !req.body.status ||
-      !req.body.position ||
-      !req.body.division ||
-      !req.body.brigade
-    ) {
-      return res.status(400).send('모든 파라미터를 입력받지 못했습니다.');
+    if (!paramUtil.paramCheck(user, 'email')) {
+      res.status(400).send('email 파라미터 확인');
     }
+    if (!paramUtil.paramCheck(user, 'password')) {
+      res.status(400).send('keyword 파라미터 확인');
+    }
+    if (!paramUtil.paramCheck(user, 'name')) {
+      res.status(400).send('keyword 파라미터 확인');
+    }
+    if (!paramUtil.paramCheck(user, 'status')) {
+      res.status(400).send('keyword 파라미터 확인');
+    }
+    if (!paramUtil.paramCheck(user, 'position')) {
+      res.status(400).send('keyword 파라미터 확인');
+    }
+    if (!paramUtil.paramCheck(user, 'division')) {
+      res.status(400).send('keyword 파라미터 확인');
+    }
+    if (!paramUtil.paramCheck(user, 'brigade')) {
+      res.status(400).send('keyword 파라미터 확인');
+    }
+    // if (
+    //   !req.body.email ||
+    //   !req.body.password ||
+    //   !req.body.name ||
+    //   !req.body.status ||
+    //   !req.body.position ||
+    //   !req.body.division ||
+    //   !req.body.brigade
+    // ) {
+    //   return res.status(400).send('모든 파라미터를 입력받지 못했습니다.');
+    // }
 
     const [isUser] = await mysqlUtils('CALL proc_select_user_exist(?)', [
       user.email,

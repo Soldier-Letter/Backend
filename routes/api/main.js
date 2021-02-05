@@ -1,13 +1,14 @@
 const express = require('express');
-
 const mysqlUtil = require('../../utils/mysqlUtils');
+const paramUtil = require('../../utils/paramUtil');
 const router = new express.Router();
+const { auth, hash, emailValidator } = require('../middleware/auth');
 
 // 메인 검색
 router.get('/main/search', async function (req, res, next) {
   try {
     const params = req.query;
-    if (!paramCheck(params, 'keyword')) {
+    if (!paramUtil.paramCheck(params, 'keyword')) {
       res.status(400).send('파라미터 확인');
     }
     const divisionList = await mysqlUtil(
@@ -71,12 +72,30 @@ router.get('/main/div-rank', async function (req, res, next) {
   }
 });
 
-// eslint-disable-next-line require-jsdoc
-function paramCheck(params, key) {
-  if (!params[key] && Number(params[key]) !== 0) {
-    return false;
+router.post('/main/like', auth, async function (req, res, next) {
+  try {
+    const params = req.body;
+    const user = req.user;
+    if (!paramUtil.paramCheck(params, 'target_uid')) {
+      res.status(400).send('target_uid 파라미터 확인');
+    }
+    if (!paramUtil.paramCheck(params, 'type')) {
+      res.status(400).send('type 파라미터 확인');
+    }
+    const likeInfo = await mysqlUtil('call proc_insert_log_like(?,?,?)', [
+      user['uid'],
+      params['target_uid'],
+      params['type'],
+    ]);
+    await mysqlUtil('call proc_update_user_rank(?)', [
+      likeInfo[0]['writer_uid'],
+    ]); // 작성자에 대해서 레벨 업데이트
+
+    res.status(200).send(likeInfo[0]);
+  } catch (e) {
+    console.log(e);
+    res.status(400).send(e);
   }
-  return true;
-}
+});
 
 module.exports = router;

@@ -1,12 +1,16 @@
 const express = require('express');
 const mysqlUtil = require('../../utils/mysqlUtils');
+const paramUtil = require('../../utils/paramUtil');
 const router = new express.Router();
 const { auth } = require('../middleware/auth');
 
 router.get('/qna/search', async (req, res) => {
   try {
     const params = req.query;
-    if (!paramCheck(params, 'keyword') || !paramCheck(params, 'type')) {
+    if (
+      !paramUtil.paramCheck(params, 'keyword') ||
+      !paramUtil.paramCheck(params, 'type')
+    ) {
       res.status(400).send('파라미터 확인');
     }
 
@@ -31,7 +35,7 @@ router.get('/qna/search', async (req, res) => {
 router.get('/qna/list', async (req, res) => {
   try {
     const params = req.query;
-    if (!paramCheck(params, 'type')) {
+    if (!paramUtil.paramCheck(params, 'type')) {
       return res.status(400).send('파라미터 확인');
     }
 
@@ -50,7 +54,10 @@ router.get('/qna/list', async (req, res) => {
 router.post('/qna', auth, async (req, res) => {
   try {
     const params = req.body;
-    if (!paramCheck(params, 'title') || !paramCheck(params, 'content')) {
+    if (
+      !paramUtil.paramCheck(params, 'title') ||
+      !paramUtil.paramCheck(params, 'content')
+    ) {
       return res.status(400).send('파라미터 확인');
     }
 
@@ -65,12 +72,5 @@ router.post('/qna', auth, async (req, res) => {
     res.status(401).send(e);
   }
 });
-
-function paramCheck(params, key) {
-  if (!params[key] && Number(params[key]) !== 0) {
-    return false;
-  }
-  return true;
-}
 
 module.exports = router;

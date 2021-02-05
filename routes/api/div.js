@@ -1,5 +1,6 @@
 const express = require('express');
 const mysqlUtil = require('../../utils/mysqlUtils');
+const paramUtil = require('../../utils/paramUtil');
 const router = new express.Router();
 const { auth, hash, emailValidator } = require('../middleware/auth');
 
@@ -31,7 +32,7 @@ const upload = multer({
 router.get('/div/info', async function (req, res, next) {
   try {
     const params = req.query;
-    if (!paramCheck(params, 'uid')) {
+    if (!paramUtil.paramCheck(params, 'uid')) {
       res.status(400).send('uid 파라미터 확인');
     }
     const divInfo = await mysqlUtil('call proc_select_div_info(?)', [
@@ -47,13 +48,13 @@ router.get('/div/info', async function (req, res, next) {
 router.get('/div/rating', async function (req, res, next) {
   try {
     const params = req.query;
-    if (!paramCheck(params, 'uid')) {
+    if (!paramUtil.paramCheck(params, 'uid')) {
       res.status(400).send('uid 파라미터 확인');
     }
-    if (!paramCheck(params, 'status')) {
+    if (!paramUtil.paramCheck(params, 'status')) {
       res.status(400).send('status 파라미터 확인');
     }
-    if (!paramCheck(params, 'type')) {
+    if (!paramUtil.paramCheck(params, 'type')) {
       res.status(400).send('type 파라미터 확인');
     }
     const divRatingInfo = await mysqlUtil(
@@ -103,10 +104,10 @@ router.get('/div/rating', async function (req, res, next) {
 router.get('/div/community/search', async function (req, res, next) {
   try {
     const params = req.query;
-    if (!paramCheck(params, 'uid')) {
+    if (!paramUtil.paramCheck(params, 'uid')) {
       res.status(400).send('uid 파라미터 확인');
     }
-    if (!paramCheck(params, 'keyword')) {
+    if (!paramUtil.paramCheck(params, 'keyword')) {
       res.status(400).send('keyword 파라미터 확인');
     }
     const searchList = await mysqlUtil(
@@ -123,10 +124,10 @@ router.get('/div/community/search', async function (req, res, next) {
 router.get('/div/community', async function (req, res, next) {
   try {
     const params = req.query;
-    if (!paramCheck(params, 'uid')) {
+    if (!paramUtil.paramCheck(params, 'uid')) {
       res.status(400).send('uid 파라미터 확인');
     }
-    if (!paramCheck(params, 'type')) {
+    if (!paramUtil.paramCheck(params, 'type')) {
       res.status(400).send('type 파라미터 확인');
     }
     let communityList = [];
@@ -152,10 +153,10 @@ router.get('/div/community', async function (req, res, next) {
 router.get('/div/local', async function (req, res, next) {
   try {
     const params = req.query;
-    if (!paramCheck(params, 'uid')) {
+    if (!paramUtil.paramCheck(params, 'uid')) {
       res.status(400).send('uid 파라미터 확인');
     }
-    if (!paramCheck(params, 'type')) {
+    if (!paramUtil.paramCheck(params, 'type')) {
       res.status(400).send('type 파라미터 확인');
     }
     let localList = [];
@@ -180,10 +181,10 @@ router.get('/div/local', async function (req, res, next) {
 router.get('/div/local/search', async function (req, res, next) {
   try {
     const params = req.query;
-    if (!paramCheck(params, 'uid')) {
+    if (!paramUtil.paramCheck(params, 'uid')) {
       res.status(400).send('uid 파라미터 확인');
     }
-    if (!paramCheck(params, 'keyword')) {
+    if (!paramUtil.paramCheck(params, 'keyword')) {
       res.status(400).send('keyword 파라미터 확인');
     }
     const searchList = await mysqlUtil(
@@ -201,19 +202,19 @@ router.post('/div/local', auth, async function (req, res, next) {
   try {
     const user = req.user;
     const params = req.body;
-    if (!paramCheck(params, 'div_uid')) {
+    if (!paramUtil.paramCheck(params, 'div_uid')) {
       res.status(400).send('div_uid 파라미터 확인');
     }
-    if (!paramCheck(params, 'name')) {
+    if (!paramUtil.paramCheck(params, 'name')) {
       res.status(400).send('name 파라미터 확인');
     }
-    if (!paramCheck(params, 'address')) {
+    if (!paramUtil.paramCheck(params, 'address')) {
       res.status(400).send('address 파라미터 확인');
     }
-    if (!paramCheck(params, 'content')) {
+    if (!paramUtil.paramCheck(params, 'content')) {
       res.status(400).send('content 파라미터 확인');
     }
-    if (!paramCheck(params, 'type')) {
+    if (!paramUtil.paramCheck(params, 'type')) {
       res.status(400).send('type 파라미터 확인');
     }
 
@@ -246,37 +247,37 @@ router.post('/div/rating', auth, async function (req, res, next) {
   try {
     const user = req.user;
     const params = req.body;
-    if (!paramCheck(params, 'div_uid')) {
+    if (!paramUtil.paramCheck(params, 'div_uid')) {
       res.status(400).send('div_uid 파라미터 확인');
     }
-    if (!paramCheck(params, 'rating')) {
+    if (!paramUtil.paramCheck(params, 'rating')) {
       res.status(400).send('rating 파라미터 확인');
     }
-    if (!paramCheck(params, 'px_rating')) {
+    if (!paramUtil.paramCheck(params, 'px_rating')) {
       res.status(400).send('px_rating 파라미터 확인');
     }
-    if (!paramCheck(params, 'domitory_rating')) {
+    if (!paramUtil.paramCheck(params, 'domitory_rating')) {
       res.status(400).send('domitory_rating 파라미터 확인');
     }
-    if (!paramCheck(params, 'shower_rating')) {
+    if (!paramUtil.paramCheck(params, 'shower_rating')) {
       res.status(400).send('shower_rating 파라미터 확인');
     }
-    if (!paramCheck(params, 'meal_rating')) {
+    if (!paramUtil.paramCheck(params, 'meal_rating')) {
       res.status(400).send('meal_rating 파라미터 확인');
     }
-    if (!paramCheck(params, 'location_rating')) {
+    if (!paramUtil.paramCheck(params, 'location_rating')) {
       res.status(400).send('location_rating 파라미터 확인');
     }
-    if (!paramCheck(params, 'comment')) {
+    if (!paramUtil.paramCheck(params, 'comment')) {
       res.status(400).send('comment 파라미터 확인');
     }
-    if (!paramCheck(params, 'pros')) {
+    if (!paramUtil.paramCheck(params, 'pros')) {
       res.status(400).send('pros 파라미터 확인');
     }
-    if (!paramCheck(params, 'cons')) {
+    if (!paramUtil.paramCheck(params, 'cons')) {
       res.status(400).send('cons 파라미터 확인');
     }
-    if (!paramCheck(params, 'content')) {
+    if (!paramUtil.paramCheck(params, 'content')) {
       res.status(400).send('content 파라미터 확인');
     }
     const ratingInfo = await mysqlUtil(
@@ -317,7 +318,7 @@ router.post(
   async function (req, res, next) {
     try {
       const params = req.body;
-      if (!paramCheck(params, 'uid')) {
+      if (!paramUtil.paramCheck(params, 'uid')) {
         res.status(400).send('uid 파라미터 확인');
       }
       if (!req.file) {
@@ -338,11 +339,4 @@ router.post(
   },
 );
 
-// eslint-disable-next-line require-jsdoc
-function paramCheck(params, key) {
-  if (!params[key] && Number(params[key]) !== 0) {
-    return false;
-  }
-  return true;
-}
 module.exports = router;

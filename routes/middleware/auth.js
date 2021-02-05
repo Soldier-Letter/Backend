@@ -1,10 +1,8 @@
-const dbconfig = require('../../config/database');
-const mysql = require('mysql2/promise');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const validator = require('validator');
+const mysqlUtils = require('../../utils/mysqlUtils');
 const trim = require('trim');
-const conn = mysql.createPool(dbconfig);
 
 const emailValidator = (req, res, next) => {
   try {
@@ -24,13 +22,16 @@ const auth = async (req, res, next) => {
     const token = req.header('Authorization').replace('Bearer ', '');
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    const user = await conn.execute('SELECT * FROM USER WHERE token = ?')
-
-    if (!user) {
-      throw new Error('No user');
+    const [isUser] = await mysqlUtils('CALL isUserByToken(?)', [decoded.email]);
+    console.log(isUser['COUNT']);
+    if (isUser['COUNT'] != '1') {
+      throw new Error();
     }
 
-    req.user = user;
+    const [user] = await mysqlUtils('CALL getUserByToken(?)', [decoded.email]);
+    const resultUser = { ...user };
+
+    req.user = resultUser;
     next();
   } catch (e) {
     res.status(401).send({ error: 'Please authenticate' });

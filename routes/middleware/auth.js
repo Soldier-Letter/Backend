@@ -22,13 +22,13 @@ const auth = async (req, res, next) => {
     const token = req.header('Authorization').replace('Bearer ', '');
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    const [isUser] = await mysqlUtils('CALL isUserByToken(?)', [decoded.email]);
+    const [isUser] = await mysqlUtils('CALL proc_select_user_exist(?)', [decoded.email]);
     console.log(isUser['COUNT']);
     if (isUser['COUNT'] != '1') {
       throw new Error();
     }
 
-    const [user] = await mysqlUtils('CALL getUserByToken(?)', [decoded.email]);
+    const [user] = await mysqlUtils('CALL proc_select_user_token(?)', [decoded.email]);
     const resultUser = { ...user };
 
     req.user = resultUser;

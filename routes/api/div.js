@@ -178,5 +178,4 @@ function paramCheck(params, key) {
   }
   return true;
 }
-
 module.exports = router;

@@ -10,7 +10,7 @@ const dBquery = async (query, params) => {
       console.log(rows);
       await connection.commit();
       connection.release();
-      return rows;
+      return rows[0];
     } catch (e) {
       await connection.rollback();
       connection.release();

@@ -10,22 +10,39 @@ router.post('/user', [emailValidator, hash], async (req, res) => {
   try {
     const user = req.body;
 
-    const [isUser] = await mysqlUtils('CALL isUser(?)', [user.email]);
-
-    if (isUser['COUNT'] != '0') {
-      return res.status(400).send();
+    if (
+      !req.body.email ||
+      !req.body.password ||
+      !req.body.name ||
+      !req.body.status ||
+      !req.body.position ||
+      !req.body.division ||
+      !req.body.brigade
+    ) {
+      return res.status(400).send('모든 파라미터를 입력받지 못했습니다.');
     }
 
-    const [result] = await mysqlUtils('CALL registerUser(?,?,?,?,?,?,?,?)', [
+    const [isUser] = await mysqlUtils('CALL proc_select_user_exist(?)', [
       user.email,
-      user.password,
-      user.name,
-      user.nickname,
-      user.status,
-      user.position,
-      user.division,
-      user.brigade,
     ]);
+
+    if (isUser['COUNT'] != '0') {
+      return res.status(400).send('이미 존재하는 email 입니다.');
+    }
+
+    const [result] = await mysqlUtils(
+      'CALL proc_insert_user(?,?,?,?,?,?,?,?)',
+      [
+        user.email,
+        user.password,
+        user.name,
+        user.nickname,
+        user.status,
+        user.position,
+        user.division,
+        user.brigade,
+      ],
+    );
 
     res.status(200).send(result);
   } catch (e) {
@@ -39,7 +56,9 @@ router.post('/user/login', emailValidator, async (req, res) => {
     if (!req.body.email || !req.body.password) {
       return res.status(400).send();
     }
-    const [user] = await mysqlUtils('CALL getUserByEmail(?)', [req.body.email]);
+    const [user] = await mysqlUtils('CALL proc_select_user_email(?)', [
+      req.body.email,
+    ]);
 
     const isMatch = await bcrypt.compare(req.body.password, user.password);
 
@@ -48,7 +67,9 @@ router.post('/user/login', emailValidator, async (req, res) => {
         expiresIn: '12h',
       });
 
-      const [userWithToken] = await mysqlUtils('CALL login(?, ?)', [
+      const [
+        userWithToken,
+      ] = await mysqlUtils('CALL proc_update_user_token(?, ?)', [
         user.uid,
         token,
       ]);
@@ -64,7 +85,7 @@ router.post('/user/login', emailValidator, async (req, res) => {
 // 유저 로그아웃
 router.post('/user/logout', auth, async (req, res) => {
   try {
-    await mysqlUtils('CALL logout(?)', [req.user.token]);
+    await mysqlUtils('CALL proc_update_user_token_null(?)', [req.user.token]);
     res.status(204).send();
   } catch (e) {
     res.status(404).send();

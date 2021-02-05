@@ -1,6 +1,7 @@
 const express = require('express');
 const mysqlUtil = require('../../utils/mysqlUtils');
 const router = new express.Router();
+const { auth, hash, emailValidator } = require('../middleware/auth');
 
 router.get('/div/info', async function (req, res, next) {
   try {
@@ -165,6 +166,112 @@ router.get('/div/local/search', async function (req, res, next) {
       [params['uid'], params['keyword']],
     );
     res.status(200).send(searchList);
+  } catch (e) {
+    console.log(e);
+    res.status(400).send(e);
+  }
+});
+
+router.post('/div/local', auth, async function (req, res, next) {
+  try {
+    const user = req.user;
+    const params = req.body;
+    if (!paramCheck(params, 'div_uid')) {
+      res.status(400).send('div_uid 파라미터 확인');
+    }
+    if (!paramCheck(params, 'name')) {
+      res.status(400).send('name 파라미터 확인');
+    }
+    if (!paramCheck(params, 'address')) {
+      res.status(400).send('address 파라미터 확인');
+    }
+    if (!paramCheck(params, 'content')) {
+      res.status(400).send('content 파라미터 확인');
+    }
+    if (!paramCheck(params, 'type')) {
+      res.status(400).send('type 파라미터 확인');
+    }
+
+    const phoneNumber = params['phone_number'] ? params['phone_number'] : null;
+    const price = params['price'] ? params['price'] : null;
+    const information = params['information'] ? params['information'] : null;
+
+    const divFacility = await mysqlUtil(
+      'call proc_insert_div_local(?,?,?,?,?,?,?,?,?)',
+      [
+        user['uid'],
+        params['div_uid'],
+        params['type'],
+        params['name'],
+        phoneNumber,
+        params['address'],
+        price,
+        params['content'],
+        information,
+      ],
+    );
+    res.status(200).send(divFacility);
+  } catch (e) {
+    console.log(e);
+    res.status(400).send(e);
+  }
+});
+
+router.post('/div/rating', auth, async function (req, res, next) {
+  try {
+    const user = req.user;
+    const params = req.body;
+    if (!paramCheck(params, 'div_uid')) {
+      res.status(400).send('div_uid 파라미터 확인');
+    }
+    if (!paramCheck(params, 'rating')) {
+      res.status(400).send('rating 파라미터 확인');
+    }
+    if (!paramCheck(params, 'px_rating')) {
+      res.status(400).send('px_rating 파라미터 확인');
+    }
+    if (!paramCheck(params, 'domitory_rating')) {
+      res.status(400).send('domitory_rating 파라미터 확인');
+    }
+    if (!paramCheck(params, 'shower_rating')) {
+      res.status(400).send('shower_rating 파라미터 확인');
+    }
+    if (!paramCheck(params, 'meal_rating')) {
+      res.status(400).send('meal_rating 파라미터 확인');
+    }
+    if (!paramCheck(params, 'location_rating')) {
+      res.status(400).send('location_rating 파라미터 확인');
+    }
+    if (!paramCheck(params, 'comment')) {
+      res.status(400).send('comment 파라미터 확인');
+    }
+    if (!paramCheck(params, 'pros')) {
+      res.status(400).send('pros 파라미터 확인');
+    }
+    if (!paramCheck(params, 'cons')) {
+      res.status(400).send('cons 파라미터 확인');
+    }
+    if (!paramCheck(params, 'content')) {
+      res.status(400).send('content 파라미터 확인');
+    }
+    const ratingInfo = await mysqlUtil(
+      'call proc_insert_div_rating(?,?,?,?,?,?,?,?,?,?,?,?)',
+      [
+        user['uid'],
+        params['div_uid'],
+        params['rating'],
+        params['px_rating'],
+        params['domitory_rating'],
+        params['shower_rating'],
+        params['meal_rating'],
+        params['location_rating'],
+        params['comment'],
+        params['pros'],
+        params['cons'],
+        params['content'],
+      ],
+    );
+    res.status(200).send(ratingInfo);
   } catch (e) {
     console.log(e);
     res.status(400).send(e);

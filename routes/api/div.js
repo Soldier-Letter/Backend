@@ -3,6 +3,31 @@ const mysqlUtil = require('../../utils/mysqlUtils');
 const router = new express.Router();
 const { auth, hash, emailValidator } = require('../middleware/auth');
 
+const multer = require('multer');
+const multerS3 = require('multer-s3');
+const AWS = require('aws-sdk');
+
+const s3 = new AWS.S3({
+  accessKeyId: process.env.KEYID,
+  secretAccessKey: process.env.KEY,
+  region: process.env.REGION,
+});
+
+let imageName = '';
+
+const upload = multer({
+  storage: multerS3({
+    s3: s3,
+    contentType: multerS3.AUTO_CONTENT_TYPE,
+    bucket: process.env.BUCKET,
+    key: function (req, file, cb) {
+      imageName = Date.now() + file.originalname;
+      cb(null, imageName);
+    },
+    acl: 'public-read-write',
+  }),
+});
+
 router.get('/div/info', async function (req, res, next) {
   try {
     const params = req.query;
@@ -285,6 +310,33 @@ router.post('/div/rating', auth, async function (req, res, next) {
     res.status(400).send(e);
   }
 });
+
+router.post(
+  '/div/local/image',
+  [auth, upload.single('image')],
+  async function (req, res, next) {
+    try {
+      const params = req.body;
+      if (!paramCheck(params, 'uid')) {
+        res.status(400).send('uid 파라미터 확인');
+      }
+      if (!req.file) {
+        res.status(400).send('이미지 파일 확인');
+      }
+      const divLocalInfo = await mysqlUtil(
+        'call proc_update_div_local_image(?,?)',
+        [
+          params['uid'],
+          `https://hackathonbootcamp.s3.ap-northeast-2.amazonaws.com/${imageName}`,
+        ],
+      );
+      res.status(200).send(divLocalInfo[0]);
+    } catch (e) {
+      console.log(e);
+      res.status(400).send(e);
+    }
+  },
+);
 
 // eslint-disable-next-line require-jsdoc
 function paramCheck(params, key) {
